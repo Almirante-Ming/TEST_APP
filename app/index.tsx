@@ -1,22 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, Modal, TouchableOpacity, Animated } from 'react-native';
 import { Calendar } from 'react-native-calendars';
+import axios from 'axios';
 
 const App = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [backgroundOpacity] = useState(new Animated.Value(0));
-  const [notes, setNotes] = useState({
-    '2025-03-11': [
-      { time: '10h - 12h', note: 'Reunião com equipe' },
-      { time: '14h - 16h', note: 'Projeto final' },
-      { time: '16h - 17h', note: 'Chamada com cliente' }
-    ],
-    '2025-03-12': [
-      { time: '09h - 10h', note: 'Consulta médica' },
-      { time: '11h - 12h', note: 'Entrega de relatório' }
-    ]
-  });
+  const [notes, setNotes] = useState({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:7777/');
+        setNotes(response.data || {});
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleDayPress = (day) => {
     setSelectedDate(day.dateString);
@@ -35,6 +39,11 @@ const App = () => {
       useNativeDriver: true,
     }).start(() => setModalVisible(false));
   };
+
+  const sortedNotes = [...(notes[selectedDate] || [])].sort((a, b) => {
+    const getTimeValue = (time) => parseInt(time.split('h')[0]);
+    return getTimeValue(a.time) - getTimeValue(b.time);
+  });
 
   return (
     <View style={styles.container}>
@@ -71,7 +80,7 @@ const App = () => {
           <View style={styles.modalContainer}>
             <Text style={styles.title}>Anotações para {selectedDate || '...'}</Text>
             <FlatList
-              data={notes[selectedDate] || []}
+              data={sortedNotes}
               keyExtractor={(item, index) => index.toString()}
               showsVerticalScrollIndicator={false}
               renderItem={({ item }) => (
@@ -80,6 +89,7 @@ const App = () => {
                   <Text style={styles.cardNote}>{item.note}</Text>
                 </View>
               )}
+              ListEmptyComponent={<Text style={styles.emptyText}>Nenhuma anotação encontrada</Text>}
             />
           </View>
         </TouchableOpacity>
@@ -97,6 +107,7 @@ const styles = StyleSheet.create({
   card: { backgroundColor: '#FFFFFF', padding: 15, borderRadius: 10, marginBottom: 10, alignItems: 'center' },
   cardTime: { fontSize: 16, fontWeight: 'bold', color: '#333' },
   cardNote: { fontSize: 14, color: '#666', marginTop: 5 },
+  emptyText: { fontSize: 14, color: '#DDD', textAlign: 'center', marginTop: 20 },
 });
 
 export default App;
