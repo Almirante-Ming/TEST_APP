@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, Modal, TouchableOpacity, Animated } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import axios from 'axios';
+import { calendarTheme } from '../styles/calendarTheme';
 
 const App = () => {
   const [selectedDate, setSelectedDate] = useState('');
@@ -52,21 +53,7 @@ const App = () => {
         markedDates={{
           [selectedDate]: { selected: true, selectedColor: '#FF6347' },
         }}
-        theme={{
-          backgroundColor: '#A80742',
-          calendarBackground: '#810e13',
-          textSectionTitleColor: '#FFFFFF',
-          selectedDayBackgroundColor: '#FF6347',
-          selectedDayTextColor: '#FFFFFF',
-          todayTextColor: '#FFA500',
-          dayTextColor: '#FFFFFF',
-          textDisabledColor: '#666666',
-          dotColor: '#FF6347',
-          selectedDotColor: '#FFFFFF',
-          arrowColor: '#FFA500',
-          monthTextColor: '#FFFFFF',
-          indicatorColor: '#FFA500',
-        }}
+        theme={calendarTheme}
       />
       
       <Modal
